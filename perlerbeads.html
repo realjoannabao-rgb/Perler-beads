@@ -6,22 +6,55 @@
     <title>拼豆图纸自动生成工具</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
+        /* 导入可爱字体 */
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Comic+Neue:wght@400;700&display=swap');
+        
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Comic Neue', cursive;
             max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: #FFF5E6;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFD9B3' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
         .container {
-            background-color: white;
+            background-color: #FFFAF0;
             padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            border: 2px solid #FFD9B3;
+            position: relative;
+            overflow: hidden;
+        }
+        /* 像素装饰元素 */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 60px;
+            height: 60px;
+            background-color: #FFE6CC;
+            clip-path: polygon(100% 0, 0 0, 100% 100%);
+        }
+        .container::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 60px;
+            background-color: #FFE6CC;
+            clip-path: polygon(0 100%, 0 0, 100% 100%);
         }
         h1 {
             text-align: center;
-            color: #333;
+            color: #FF6B6B;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 32px;
+            text-shadow: 2px 2px 0 #FFD9B3;
+            margin-bottom: 30px;
+            letter-spacing: -1px;
         }
         .upload-section {
             margin: 20px 0;
@@ -29,20 +62,81 @@
         }
         #fileInput {
             margin: 10px 0;
+            padding: 10px;
+            border: 2px dashed #FFB3B3;
+            border-radius: 8px;
+            background-color: #FFF9F9;
+            width: 80%;
+            transition: all 0.3s ease;
+        }
+        #fileInput:hover {
+            border-color: #FF6B6B;
+            background-color: #FFF0F0;
         }
         .density-section {
             text-align: center;
             margin: 20px 0;
+            background-color: #FFF0E6;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #FFD9B3;
+        }
+        .density-section h3 {
+            color: #FF8C8C;
+            margin-bottom: 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
         }
         .density-option {
             margin: 0 10px;
+            display: inline-block;
+            padding: 8px 12px;
+            background-color: #FFF9F9;
+            border-radius: 6px;
+            border: 1px solid #FFD9B3;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-        .palette-option {
-            margin: 0 10px;
+        .density-option:hover {
+            background-color: #FFE6CC;
+            transform: translateY(-2px);
+        }
+        .density-option input[type="radio"] {
+            margin-right: 5px;
+            accent-color: #FF6B6B;
         }
         .palette-section {
             text-align: center;
             margin: 20px 0;
+            background-color: #F0FFF0;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #D9FFD9;
+        }
+        .palette-section h3 {
+            color: #198119;
+            margin-bottom: 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+        }
+        .palette-option {
+            margin: 0 5px;
+            display: inline-block;
+            padding: 8px 10px;
+            background-color: #F9FFF9;
+            border-radius: 6px;
+            border: 1px solid #83d183;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+        .palette-option:hover {
+            background-color: #0f7d0f;
+            transform: translateY(-2px);
+        }
+        .palette-option input[type="radio"] {
+            margin-right: 5px;
+            accent-color: lab(42.34% -44.07 33.03 / 0.765);
         }
         .preview-section {
             display: flex;
@@ -53,52 +147,140 @@
         .preview {
             text-align: center;
             margin: 10px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 2px solid #FFE6CC;
+            transition: all 0.3s ease;
+        }
+        .preview:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .preview h3 {
+            color: #FF8C8C;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 18px;
+            margin-bottom: 18px;
         }
         img {
             max-width: 300px;
             max-height: 300px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            border: 3px solid #FFD9B3;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         canvas {
             max-width: 300px;
             max-height: 300px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            border: 3px solid #FFD9B3;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .button-section {
             text-align: center;
             margin: 20px 0;
         }
         button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4CAF50;
+            padding: 12px 24px;
+            font-size: 18px;
+            background-color: #FF6B6B;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
             margin: 5px;
+            font-family: 'Comic Neue', cursive;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #FF5252;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
         button:disabled {
-            background-color: #cccccc;
+            background-color: #FFD9D9;
+            color: #FF9E9E;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
         .instructions {
-            background-color: #f0f8ff;
-            padding: 15px;
-            border-radius: 4px;
+            background-color: #FFF9F0;
+            padding: 20px;
+            border-radius: 10px;
             margin: 20px 0;
+            border: 2px solid #FFE6CC;
+        }
+        .instructions h3 {
+            color: #FF8C8C;
+            margin-bottom: 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 18px;
+        }
+        .instructions ol {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .instructions li {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        .instructions li::before {
+            content: '🎮';
+            position: absolute;
+            left: 0;
+            top: 0;
         }
         .info {
-            background-color: #f9f9f9;
-            padding: 10px;
-            border-radius: 4px;
+            background-color: #FFF9F9;
+            padding: 12px;
+            border-radius: 8px;
             margin: 10px 0;
-            font-size: 14px;
+            font-size: 18px;
+            border: 1px solid #FFD9B3;
+            color: #555;
+        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            .preview-section {
+                flex-direction: column;
+                align-items: center;
+            }
+            .preview {
+                width: 90%;
+            }
+            img, canvas {
+                max-width: 100%;
+            }
+            .palette-option {
+                display: block;
+                margin: 5px auto;
+                width: 80%;
+            }
+        }
+        /* 像素风格动画 */
+        @keyframes pixelBounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+        .pixel-bounce {
+            animation: pixelBounce 2s infinite;
         }
     </style>
 </head>
